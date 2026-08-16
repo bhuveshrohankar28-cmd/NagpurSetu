@@ -105,10 +105,10 @@ type Notify = (
 ) => void;
 
 const defaultProfile: Profile = {
-  name: 'Aditi Patil',
+  name: 'Bhuvesh Rohankar',
   age: '28',
   phone: '+91 98220 44118',
-  gender: 'Female',
+  gender: 'male',
   address: 'Dharampeth, Nagpur',
   bloodGroup: 'A+',
   medicalNotes:
