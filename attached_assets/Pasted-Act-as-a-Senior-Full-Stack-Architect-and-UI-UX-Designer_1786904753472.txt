@@ -1,0 +1,82 @@
+Act as a Senior Full-Stack Architect and UI/UX Designer. I am building a project for the Manthan4Yuva Hackathon under the theme "Open Innovation for Viksit Nagpur".
+
+### Project Concept:
+"NagpurSetu" — A unified, accessible civic and emergency dashboard for the citizens of Nagpur that prioritizes rapid emergency routing, real-time municipal transparency, and citizen innovation.
+
+---
+
+### Realistic Mock Datasets Required:
+
+Please embed and structure the following realistic Nagpur mock data directly in the application state:
+
+1. "Nagpur Today" Live Impact Counter:
+   - complaintsResolved: 27
+   - garbageVehiclesActive: 14
+   - potholesRepaired: 8
+   - waterLeaksFixed: 3
+   - civicProjectsCompleted: 2
+   - lastUpdated: "2 mins ago (NMC Central Feed)"
+
+2. Emergency & Healthcare Directory:
+   - Hospitals:
+     * GMCH Nagpur (Medical Square) | Emergency ICU: 8 Beds Available | Contact: +91-712-2725423 | Distance: 2.1 km
+     * AIIMS Nagpur (MIHAN) | Emergency ICU: 14 Beds Available | Contact: +91-712-2811000 | Distance: 7.4 km
+     * Orange City Hospital (Khamla) | Emergency ICU: 3 Beds Available | Contact: +91-712-6639800 | Distance: 3.5 km
+   - 24/7 Pharmacies & Blood Banks:
+     * Jeevan Jyoti Blood Bank (Dharampeth) | Units: O+ (18), B+ (12), A- (4)
+     * Apollo 24/7 Pharmacy (Sitabuldi Metro Station) | Open Now
+
+3. Swachh Nagpur & Waste Grievance Tracking (Direct to NMC Workflow):
+   - Active NMC Grievance Tickets (Demonstrating status pipeline):
+     * Ticket #NMC-SAN-1042 | Category: Overflowing Garbage Dump | Location: Shankar Nagar Square, Dharampeth | Status: "Dispatched to Zone 2 Sanitation Van #MH-31-AZ-1042" | ETA: "45 mins"
+     * Ticket #NMC-SAN-0988 | Category: Missed Door-to-Door Pickup | Location: Bajaj Nagar, Zone 3 | Status: "Under Review by Zonal Health Officer" | ETA: "Today, 2:00 PM"
+     * Ticket #NMC-SAN-0850 | Category: Commercial Waste Accumulation | Location: Sitabuldi Main Market | Status: "Resolved & Cleaned" | Completed: "1 hour ago"
+
+4. Nagpur Metro & Transit Feeder Links:
+   - Orange Line (Khapri ↔ Automotive Square): Trains every 6 mins | Next at Sitabuldi: 3 mins
+   - Aqua Line (Lokmanya Nagar ↔ Prajapati Nagar): Trains every 6 mins | Next at Sitabuldi: 5 mins
+   - Feeder EV Shuttles: Route E-4 (Sitabuldi to Civil Lines) departing platform 2 in 4 mins
+
+5. Viksit Nagpur 2047 Open Innovation Board:
+   - Idea 1: "EV feeder auto stands at Sitabuldi & Rahate Colony Metro interchanges" | Author: Aarav Sharma | Votes: 42 | Status: Under NMC Review
+   - Idea 2: "Solar tree canopies with USB charging around Futala Lake promenade" | Author: Pooja Deshmukh | Votes: 29 | Status: Shortlisted
+   - Idea 3: "Smart QR-coded segregation bins for Dharampeth weekly vegetable market" | Author: Nikhil Kulkarni | Votes: 19 | Status: Open for Voting
+
+---
+
+### Core Feature Requirements:
+
+1. Advanced Quick-Access SOS Hub:
+   - High-contrast, floating emergency action bar with one-touch triggers:
+     * Police (112), Ambulance (108), Fire (101), Women Helpline (1091), Senior Citizen Support (14567).
+   - "Broadcast SOS" Feature: Copies real-time GPS coordinates and opens a pre-filled emergency SMS/WhatsApp template for trusted contacts.
+   - Silent / Camouflage SOS: Discreet alert trigger for personal safety.
+   - Medical Emergency ID: Fast modal displaying blood group, emergency contacts, and vital medical notes.
+   - Deterrent Tool: Built-in loud siren / screen strobe toggle for emergency situations.
+
+2. "Nagpur Today" (Live Civic Impact & Transparency Counter):
+   - A modern, scannable real-time impact metrics bar with distinct status icons and pulsing "Live NMC Feed" indicator.
+
+3. Swachh Nagpur & Waste Grievance Management (Grievance-to-NMC Dispatch):
+   - Quick photo-upload grievance form with auto-geolocation tag.
+   - Ticket Tracker Card: Shows real-time progress of submitted issues (Registered ➔ Assigned to Sanitation Van / Official ➔ Resolved).
+   - Instant dynamic increment: Submitting a report adds an active ticket and updates the "Nagpur Today" live statistics.
+
+4. Healthcare & Transit Hub:
+   - Filterable directory for nearby 24/7 pharmacies, blood units availability, and emergency hospitals.
+   - Nagpur Metro schedule and feeder transit finder.
+
+5. Viksit Nagpur Open Innovation:
+   - "Nagpur 2047" community suggestion board with upvotes and status badges.
+
+6. Accessibility & Multilingual Support:
+   - Toggle support for English, मराठी, and हिंदी.
+   - High-contrast emergency buttons with clear visual icons.
+
+---
+
+### Deliverables Required:
+1. Complete, responsive React component code (Next.js App Router compatible) using Tailwind CSS and Lucide React icons.
+2. Interactive SOS floating action bar and expandable SOS dialog modal containing the broadcast, siren, and emergency directory features.
+3. Clean client-side state management for modals (Emergency SOS, Medical ID view, Grievance submission with status tracking).
+4. Fully implemented mock data objects embedded cleanly within the component code.

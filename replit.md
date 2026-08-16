@@ -1,6 +1,6 @@
-# [Project name]
+# NagpurSetu
 
-_Replace the heading above with the project's name, and this line with one sentence describing what this app does for users._
+NagpurSetu is a responsive civic and emergency dashboard for Nagpur residents, combining rapid SOS access, municipal impact updates, sanitation grievance tracking, healthcare and transit information, and community ideas for Viksit Nagpur 2047.
 
 ## Run & Operate
 
@@ -22,23 +22,34 @@ _Replace the heading above with the project's name, and this line with one sente
 
 ## Where things live
 
-_Populate as you build — short repo map plus pointers to the source-of-truth file for DB schema, API contracts, theme files, etc._
+- `artifacts/nagpursetu/src/App.tsx` — client-side routes, realistic Nagpur mock data, civic workflows, emergency actions, and modals
+- `artifacts/nagpursetu/src/index.css` — NagpurSetu visual tokens, typography, texture, animation, and responsive styling
+- `artifacts/api-server` — shared API service scaffold (not required by the current mock-data-first frontend)
+- `lib/api-spec/openapi.yaml` — shared API contract source of truth for future server-backed features
 
 ## Architecture decisions
 
-_Populate as you build — non-obvious choices a reader couldn't infer from the code (3-5 bullets)._
+- The first build is intentionally client-side and mock-data-first so the hackathon demo remains fast, predictable, and usable without external services.
+- Emergency actions use browser-native `tel:`, `sms:`, and geolocation capabilities where the device supports them; no local auth or credential handling is added.
+- The shared shell keeps safety access and city navigation visible across desktop and mobile layouts.
 
 ## Product
 
-_Describe the high-level user-facing capabilities of this app once they exist._
+- Overview dashboard with live NMC impact counters and active report snapshot
+- One-touch emergency directory, broadcast SOS, silent SOS, Medical Emergency ID, and deterrent toggle
+- Healthcare, blood bank, pharmacy, metro, and feeder shuttle directory
+- Waste grievance submission with live ticket tracking and counter updates
+- Viksit Nagpur 2047 idea board with resident voting and new idea submission
+- English, Marathi, and Hindi navigation labels
 
 ## User preferences
 
-_Populate as you build — explicit user instructions worth remembering across sessions._
+No additional preferences recorded.
 
 ## Gotchas
 
-_Populate as you build — sharp edges, "always run X before Y" rules._
+- The NagpurSetu preview is a frontend-only demo; submitted grievances and idea votes are held in client state and reset on refresh.
+- Run the artifact workflow rather than a root-level dev command so the preview receives its configured path and port.
 
 ## Pointers
 
