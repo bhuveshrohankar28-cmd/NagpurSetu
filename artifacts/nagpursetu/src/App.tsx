@@ -56,6 +56,9 @@ type Ticket = {
   status: string;
   detail: string;
   tone: 'teal' | 'amber' | 'coral';
+  department?: string;
+  description?: string;
+  attachments?: string[];
 };
 type Idea = {
   id: number;
@@ -246,6 +249,24 @@ function getInitials(name: string) {
       .map((part) => part[0])
       .join('')
       .toUpperCase() || 'NS'
+  );
+}
+
+function googleMapsUrl(query: string) {
+  return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${query}, Nagpur, Maharashtra`)}`;
+}
+
+function MapsButton({ query }: { query: string }) {
+  return (
+    <a
+      href={googleMapsUrl(query)}
+      target="_blank"
+      rel="noreferrer"
+      className="inline-flex items-center gap-1.5 rounded-xl bg-[hsl(var(--primary)/.1)] px-3 py-2 text-xs font-bold text-[hsl(var(--primary))] transition hover:bg-[hsl(var(--primary)/.18)]"
+      data-testid={`link-map-${query.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`}
+    >
+      <MapPin size={14} /> Open in Google Maps
+    </a>
   );
 }
 
@@ -1047,15 +1068,30 @@ function GrievanceModal({
   onSubmit,
 }: {
   onClose: () => void;
-  onSubmit: (category: string, location: string) => void;
+  onSubmit: (
+    category: string,
+    location: string,
+    description: string,
+    department: string,
+    attachments: string[],
+  ) => void;
 }) {
   const [category, setCategory] = useState('Overflowing Garbage Dump');
   const [location, setLocation] = useState('');
+  const [description, setDescription] = useState('');
+  const [department, setDepartment] = useState('NMC Sanitation Department');
+  const [files, setFiles] = useState<File[]>([]);
   const [submitted, setSubmitted] = useState(false);
   const submit = (event: React.FormEvent) => {
     event.preventDefault();
-    if (!location.trim()) return;
-    onSubmit(category, location);
+    if (!location.trim() || !description.trim()) return;
+    onSubmit(
+      category === 'custom' ? 'Resident-submitted civic report' : category,
+      location,
+      description,
+      department,
+      files.map((file) => file.name),
+    );
     setSubmitted(true);
   };
   return (
@@ -1088,7 +1124,19 @@ function GrievanceModal({
               <option>Commercial Waste Accumulation</option>
               <option>Water leak</option>
               <option>Pothole</option>
+              <option value="custom">Other / write my own report</option>
             </select>
+          </label>
+          <label className="block text-sm font-bold">
+            Describe the issue in your own words
+            <textarea
+              value={description}
+              onChange={(event) => setDescription(event.target.value)}
+              placeholder="Tell the department what happened, what you saw, and why it needs attention."
+              data-testid="textarea-grievance-description"
+              rows={4}
+              className="mt-2 w-full resize-none rounded-xl border border-[hsl(var(--input))] bg-[hsl(var(--background))] p-3 text-sm outline-none focus:ring-2 focus:ring-[hsl(var(--ring))]"
+            />
           </label>
           <label className="block text-sm font-bold">
             Where is it?
@@ -1103,11 +1151,75 @@ function GrievanceModal({
               />
             </div>
           </label>
+          <label className="block text-sm font-bold">
+            Send this to
+            <select
+              value={department}
+              onChange={(event) => setDepartment(event.target.value)}
+              data-testid="select-grievance-department"
+              className="mt-2 w-full rounded-xl border border-[hsl(var(--input))] bg-[hsl(var(--background))] p-3 text-sm outline-none focus:ring-2 focus:ring-[hsl(var(--ring))]"
+            >
+              <option>NMC Sanitation Department</option>
+              <option>NMC Water Works Department</option>
+              <option>Nagpur Traffic Police</option>
+              <option>Nagpur Metro Rail</option>
+            </select>
+          </label>
+          <label className="block cursor-pointer rounded-xl border border-dashed border-[hsl(var(--primary)/.45)] bg-[hsl(var(--primary)/.05)] p-4 text-sm font-bold transition hover:bg-[hsl(var(--primary)/.1)]">
+            <span className="flex items-center gap-2 text-[hsl(var(--primary))]">
+              <Plus size={17} /> Attach photos or videos
+            </span>
+            <span className="mt-1 block text-xs font-normal text-[hsl(var(--muted-foreground))]">
+              Share visual evidence with the selected government department. Multiple files supported.
+            </span>
+            <input
+              type="file"
+              accept="image/*,video/*"
+              multiple
+              onChange={(event) => setFiles(Array.from(event.target.files ?? []).slice(0, 6))}
+              data-testid="input-grievance-media"
+              className="sr-only"
+            />
+          </label>
+          {files.length > 0 && (
+            <div className="space-y-2">
+              {files.map((file) => (
+                <div
+                  key={`${file.name}-${file.lastModified}`}
+                  className="flex items-center gap-2 rounded-lg bg-[hsl(var(--muted)/.55)] px-3 py-2 text-xs"
+                >
+                  <FileText size={14} className="text-[hsl(var(--primary))]" />
+                  <span className="min-w-0 flex-1 truncate">{file.name}</span>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setFiles((current) =>
+                        current.filter(
+                          (item) =>
+                            item.name !== file.name ||
+                            item.lastModified !== file.lastModified,
+                        ),
+                      )
+                    }
+                    className="rounded p-1 text-[hsl(var(--muted-foreground))] hover:bg-[hsl(var(--background))]"
+                    aria-label={`Remove ${file.name}`}
+                  >
+                    <X size={13} />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
           <div className="rounded-xl bg-[hsl(var(--muted)/.55)] p-3 text-xs text-[hsl(var(--muted-foreground))]">
             <Info size={14} className="mr-1 inline text-[hsl(var(--primary))]" />
-            Photos and precise location can be added in the next step.
+            Your description and attached media will be included in the department handoff.
           </div>
-          <Button type="submit" className="w-full" disabled={!location.trim()} testId="button-submit-grievance">
+          <Button
+            type="submit"
+            className="w-full"
+            disabled={!location.trim() || !description.trim()}
+            testId="button-submit-grievance"
+          >
             <MessageSquarePlus size={17} /> Create report
           </Button>
         </form>
@@ -1126,7 +1238,13 @@ function Home({
   stats: Stats;
   tickets: Ticket[];
   profile: Profile;
-  onSubmit: (category: string, location: string) => void;
+  onSubmit: (
+    category: string,
+    location: string,
+    description: string,
+    department: string,
+    attachments: string[],
+  ) => void;
   onNotify: Notify;
 }) {
   const [sos, setSos] = useState(false);
@@ -1449,7 +1567,138 @@ function Services() {
   );
 }
 
-function Grievances({ tickets, onSubmit }: { tickets: Ticket[]; onSubmit: (category: string, location: string) => void }) {
+function ServicesWithMaps() {
+  const [filter, setFilter] = useState('All');
+  const hospitals = [
+    { name: 'GMCH Nagpur', area: 'Medical Square', beds: '8 ICU beds available', phone: '+91-712-2725423', distance: '2.1 km' },
+    { name: 'AIIMS Nagpur', area: 'MIHAN', beds: '14 ICU beds available', phone: '+91-712-2811000', distance: '7.4 km' },
+    { name: 'Orange City Hospital', area: 'Khamla', beds: '3 ICU beds available', phone: '+91-712-6639800', distance: '3.5 km' },
+  ];
+  const policeStations = [
+    { name: 'Sitabuldi Police Station', area: 'Mahatma Gandhi Road, Sitabuldi', phone: '0712-2561222' },
+    { name: 'Dharampeth Police Station', area: 'North Ambazari Road, Dharampeth', phone: '0712-2560044' },
+    { name: 'Sadar Police Station', area: 'Kasturchand Park, Sadar', phone: '0712-2563333' },
+  ];
+  const transit = [
+    { name: 'Orange Line', route: 'Khapri ↔ Automotive Square', timing: 'Every 6 mins · Next at Sitabuldi in 3 mins', color: 'bg-[hsl(var(--accent))]', icon: RouteIcon },
+    { name: 'Aqua Line', route: 'Lokmanya Nagar ↔ Prajapati Nagar', timing: 'Every 6 mins · Next at Sitabuldi in 5 mins', color: 'bg-[hsl(var(--primary))]', icon: Waves },
+    { name: 'Feeder EV · E-4', route: 'Sitabuldi to Civil Lines', timing: 'Departing platform 2 in 4 mins', color: 'bg-[hsl(var(--secondary))]', icon: BusFront },
+  ];
+  const show = (section: 'Healthcare' | 'Safety' | 'Medicine' | 'Transit') =>
+    filter === 'All' || filter === section;
+  return (
+    <div className="mx-auto max-w-[1200px] px-4 py-8 sm:px-7 md:px-10 md:py-12">
+      <div className="animate-rise mb-10 flex flex-wrap items-end justify-between gap-5">
+        <div>
+          <Tag>Verified city services</Tag>
+          <h1 className="display mt-4 text-4xl font-800 tracking-[-.04em] sm:text-6xl">
+            Find your<br /><span className="text-[hsl(var(--primary))]">next stop.</span>
+          </h1>
+        </div>
+        <p className="max-w-sm text-sm leading-relaxed text-[hsl(var(--muted-foreground))]">
+          Healthcare, medicine, safety and mobility—with one-tap directions for Nagpur.
+        </p>
+      </div>
+      <div className="mb-10 flex gap-2 mobile-scroll">
+        {['All', 'Healthcare', 'Safety', 'Medicine', 'Transit'].map((item) => (
+          <button
+            key={item}
+            onClick={() => setFilter(item)}
+            data-testid={`button-filter-${item.toLowerCase()}`}
+            className={`shrink-0 rounded-full px-4 py-2 text-sm font-bold transition ${filter === item ? 'bg-[hsl(var(--foreground))] text-[hsl(var(--background))]' : 'border border-[hsl(var(--border))] bg-[hsl(var(--card))] text-[hsl(var(--muted-foreground))]'}`}
+          >
+            {item}
+          </button>
+        ))}
+      </div>
+      {show('Healthcare') && (
+        <section className="animate-rise">
+          <SectionHeading eyebrow="Care, close to home" title="Hospitals & emergency care" action={<Tag>Live availability</Tag>} />
+          <div className="grid gap-3 lg:grid-cols-3">
+            {hospitals.map((hospital) => (
+              <div key={hospital.name} className="rounded-[22px] border border-[hsl(var(--border))] bg-[hsl(var(--card))] p-5 card-shadow">
+                <div className="mb-5 flex items-start justify-between">
+                  <div className="rounded-xl bg-[hsl(var(--primary)/.12)] p-2.5 text-[hsl(var(--primary))]"><Hospital size={21} /></div>
+                  <span className="mono text-[11px] text-[hsl(var(--muted-foreground))]">{hospital.distance}</span>
+                </div>
+                <h3 className="display text-lg font-800">{hospital.name}</h3>
+                <div className="mt-1 text-sm text-[hsl(var(--muted-foreground))]">{hospital.area}</div>
+                <div className="mt-1 text-xs text-[hsl(var(--muted-foreground))]">{hospital.phone}</div>
+                <div className="mt-5 flex flex-wrap items-center justify-between gap-2 border-t border-[hsl(var(--border))] pt-4">
+                  <div><div className="text-xs text-[hsl(var(--muted-foreground))]">Capacity now</div><div className="mt-1 text-sm font-bold text-[hsl(var(--primary))]">{hospital.beds}</div></div>
+                  <div className="flex gap-2">
+                    <a href={`tel:${hospital.phone.replaceAll(' ', '').replaceAll('-', '')}`} className="rounded-xl border border-[hsl(var(--border))] p-2.5 hover:bg-[hsl(var(--muted))]" aria-label={`Call ${hospital.name}`}><Phone size={16} /></a>
+                    <MapsButton query={hospital.name} />
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+      {show('Safety') && (
+        <section className="mt-11 animate-rise">
+          <SectionHeading eyebrow="Verified nearby locations" title="Police stations" action={<Tag tone="coral">Directions ready</Tag>} />
+          <div className="grid gap-3 lg:grid-cols-3">
+            {policeStations.map((station) => (
+              <div key={station.name} className="rounded-[22px] border border-[hsl(var(--border))] bg-[hsl(var(--card))] p-5 card-shadow">
+                <div className="mb-5 flex items-start justify-between">
+                  <div className="rounded-xl bg-[hsl(var(--accent)/.12)] p-2.5 text-[hsl(var(--accent))]"><Shield size={21} /></div>
+                  <Tag tone="teal">Open 24/7</Tag>
+                </div>
+                <h3 className="display text-lg font-800">{station.name}</h3>
+                <div className="mt-2 flex items-start gap-1 text-sm leading-relaxed text-[hsl(var(--muted-foreground))]"><MapPin size={14} className="mt-0.5 shrink-0" /> {station.area}</div>
+                <div className="mt-1 text-xs text-[hsl(var(--muted-foreground))]">{station.phone}</div>
+                <div className="mt-5 flex flex-wrap gap-2 border-t border-[hsl(var(--border))] pt-4">
+                  <a href={`tel:${station.phone.replaceAll('-', '')}`} className="inline-flex items-center gap-1.5 rounded-xl border border-[hsl(var(--border))] px-3 py-2 text-xs font-bold hover:bg-[hsl(var(--muted))]"><Phone size={14} /> Call station</a>
+                  <MapsButton query={station.name} />
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+      {show('Medicine') && (
+        <section className="mt-11 animate-rise">
+          <SectionHeading eyebrow="Medicine, when you need it" title="Blood & pharmacy" />
+          <div className="grid gap-3 md:grid-cols-2">
+            <div className="rounded-[22px] bg-[hsl(var(--sidebar))] p-5 text-[hsl(var(--sidebar-foreground))]">
+              <div className="mb-5 flex items-center gap-3"><div className="rounded-xl bg-[hsl(var(--sidebar-primary)/.18)] p-2.5 text-[hsl(var(--sidebar-primary))]"><Droplets size={20} /></div><div><h3 className="font-bold">Jeevan Jyoti Blood Bank</h3><div className="text-xs opacity-60">Dharampeth · Open now</div></div></div>
+              <div className="grid grid-cols-3 gap-2">{['O+', 'B+', 'A-'].map((blood, index) => <div key={blood} className="rounded-xl bg-white/5 p-3 text-center"><div className="mono text-lg font-bold text-[hsl(var(--sidebar-primary))]">{blood}</div><div className="mt-1 text-[10px] opacity-60">{[18, 12, 4][index]} units</div></div>)}</div>
+              <div className="mt-4"><MapsButton query="Jeevan Jyoti Blood Bank Dharampeth" /></div>
+            </div>
+            <div className="rounded-[22px] border border-[hsl(var(--border))] bg-[hsl(var(--card))] p-5 card-shadow">
+              <div className="mb-5 flex items-start justify-between"><div className="rounded-xl bg-[hsl(var(--secondary)/.35)] p-2.5"><Pill size={20} /></div><Tag>Open now</Tag></div>
+              <h3 className="display text-xl font-800">Apollo 24/7 Pharmacy</h3>
+              <div className="mt-1 text-sm text-[hsl(var(--muted-foreground))]">Sitabuldi Metro Station · Open now</div>
+              <div className="mt-5 flex flex-wrap items-center gap-2 border-t border-[hsl(var(--border))] pt-4"><span className="text-xs text-[hsl(var(--muted-foreground))]">1800 103 3300</span><MapsButton query="Apollo 24/7 Pharmacy Sitabuldi Metro Station" /></div>
+            </div>
+          </div>
+        </section>
+      )}
+      {show('Transit') && (
+        <section className="mt-11 animate-rise">
+          <SectionHeading eyebrow="Move with the city" title="Transit right now" action={<Tag tone="teal">All lines on time</Tag>} />
+          <div className="grid gap-3 lg:grid-cols-3">{transit.map(({ name, route, timing, color, icon: Icon }) => <div key={name} className="rounded-[22px] border border-[hsl(var(--border))] bg-[hsl(var(--card))] p-5 card-shadow"><div className="mb-7 flex items-center justify-between"><div className={`rounded-xl ${color} p-2.5`}><Icon size={20} /></div><span className="flex items-center gap-1 text-xs font-bold text-[hsl(var(--primary))]"><span className="h-1.5 w-1.5 rounded-full bg-[hsl(var(--primary))]" /> On time</span></div><h3 className="display text-lg font-800">{name}</h3><div className="mt-1 text-sm text-[hsl(var(--muted-foreground))]">{route}</div><div className="mt-5 flex items-center gap-2 border-t border-[hsl(var(--border))] pt-4 text-xs"><Clock3 size={14} className="text-[hsl(var(--primary))]" /> {timing}</div></div>)}</div>
+        </section>
+      )}
+    </div>
+  );
+}
+
+function Grievances({
+  tickets,
+  onSubmit,
+}: {
+  tickets: Ticket[];
+  onSubmit: (
+    category: string,
+    location: string,
+    description: string,
+    department: string,
+    attachments: string[],
+  ) => void;
+}) {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState('');
   const visible = useMemo(() => tickets.filter((ticket) => `${ticket.id} ${ticket.category} ${ticket.location}`.toLowerCase().includes(query.toLowerCase())), [tickets, query]);
@@ -1521,14 +1770,34 @@ function Router() {
     window.localStorage.setItem('nagpursetu-profile', JSON.stringify(nextProfile));
     addNotification('Safety profile saved', 'Your details are now connected to SOS, Medical ID, and quick contacts.');
   };
-  const submit = (category: string, locationValue: string) => {
+  const submit = (
+    category: string,
+    locationValue: string,
+    description: string,
+    department: string,
+    attachments: string[],
+  ) => {
     const id = `NMC-SAN-${String(1043 + tickets.length).padStart(4, '0')}`;
     setTickets((current) => [
-      { id, category, location: locationValue, status: 'Received', detail: 'New report · NMC team will inspect within 24 hours', tone: 'coral' },
+      {
+        id,
+        category,
+        location: locationValue,
+        status: 'Received by department',
+        detail: `${department} · ${attachments.length ? `${attachments.length} media file${attachments.length > 1 ? 's' : ''} attached` : 'No media attached'}`,
+        tone: 'coral',
+        department,
+        description,
+        attachments,
+      },
       ...current,
     ]);
     setStats((current) => ({ ...current, complaintsResolved: current.complaintsResolved + 1 }));
-    addNotification('New grievance registered', `${id} is now visible in your report tracker.`, 'amber');
+    addNotification(
+      'New grievance registered',
+      `${id} was sent to ${department}${attachments.length ? ` with ${attachments.length} photo/video attachment${attachments.length > 1 ? 's' : ''}` : ''}.`,
+      'amber',
+    );
   };
   return (
     <RoutedErrorBoundary>
@@ -1542,7 +1811,7 @@ function Router() {
           <Route path="/" component={() => <Home stats={stats} tickets={tickets} profile={profile} onSubmit={submit} onNotify={addNotification} />} />
           <Route path="/login" component={() => <ProfilePage profile={profile} onSave={saveProfile} />} />
           <Route path="/emergency" component={() => <Emergency profile={profile} onNotify={addNotification} />} />
-          <Route path="/services" component={Services} />
+          <Route path="/services" component={ServicesWithMaps} />
           <Route path="/grievances" component={() => <Grievances tickets={tickets} onSubmit={submit} />} />
           <Route path="/ideas" component={Ideas} />
           <Route component={NotFound} />
